@@ -78,9 +78,6 @@ class ReceiveNotification(object):
         self.requester.write_by_handle(0x3C, str(bytearray([0x38, 0x03])))
         self.requester.write_by_handle(0x3E, str(bytearray([0x0A])))
         data = self.requester.read_by_handle(0x3C)[0]
-        for d in data:
-            print(hex(ord(d)), end=' ')
-        print("")
         self.requester.write_by_handle(0x3A, str(bytearray([0x1, 0x0])))
         self.wait_notification()
 
@@ -104,7 +101,6 @@ class ReceiveNotification(object):
                 line_acc_y, = plot(np.asarray(self.time), np.asarray(self.data['acc-y']))
                 ylim((-2, 2))
 
-
                 subplot(3, 1, 3)
                 line_acc_z, = plot(np.asarray(self.time), np.asarray(self.data['acc-z']))
                 ylim((-2, 2))
@@ -122,13 +118,10 @@ class ReceiveNotification(object):
                 line_acc_z.set_xdata(np.asarray(self.time))
                 draw()
 
-
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print("Usage: {} <dev>".format(sys.argv[0]))
-        sys.exit(1)
+    if len(sys.argv) == 2:
+        dev = sys.argv[1]
 
-    dev = sys.argv[1]
     data_stream = dict()
     data_stream['acc-x'] = [0] * 100;
     data_stream['acc-y'] = [0] * 100;
@@ -136,5 +129,4 @@ if __name__ == '__main__':
     time_stream = range(100)
 
     ReceiveNotification("B0:B4:48:BF:C3:83", data_stream, time_stream)
-    time.sleep(20)
     print("Done.")
