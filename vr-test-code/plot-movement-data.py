@@ -12,6 +12,7 @@ import time
 from pylab import *
 import numpy as np
 
+dev = "hci0"
 ion()
 
 class Requester(GATTRequester):
@@ -71,7 +72,7 @@ class ReceiveNotification(object):
         self.time = tstream
         self.First = True
         self.received = Event()
-        self.requester = Requester(self.received, pstream, tstream, address, False, "hci0")
+        self.requester = Requester(self.received, pstream, tstream, address, False, dev)
 
         self.connect()
         self.requester.write_by_handle(0x3C, str(bytearray([0x38, 0x03])))
@@ -91,8 +92,6 @@ class ReceiveNotification(object):
         print("OK!")
 
     def wait_notification(self):
-        print("\nThis is a bit tricky. You need to make your device to send\n"
-              "some notification. I'll wait...")
         while True:
             self.received.wait()
             if (self.First):
@@ -126,9 +125,10 @@ class ReceiveNotification(object):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("Usage: {} <addr>".format(sys.argv[0]))
+        print("Usage: {} <dev>".format(sys.argv[0]))
         sys.exit(1)
 
+    dev = sys.argv[1]
     data_stream = dict()
     data_stream['acc-x'] = [0] * 100;
     data_stream['acc-y'] = [0] * 100;
