@@ -11,6 +11,9 @@ from gattlib import GATTRequester
 import time
 from pylab import *
 import numpy as np
+from pykeyboard import PyKeyboard
+
+k = PyKeyboard()
 
 dev = "hci0"
 ion()
@@ -26,6 +29,8 @@ class Requester(GATTRequester):
     def on_notification(self, handle, data):
         i = 0
         data2 = data[3:]
+        ay_avg = 1;
+        kpress = 0
 
         axl = int(hex(ord(data2[6])), 16)
         axh = int(hex(ord(data2[7])), 16)
@@ -44,6 +49,20 @@ class Requester(GATTRequester):
         if ay >= 32768:
             ay -= 65536
         ay = ay / 4096
+
+        if kpress == 1:
+            k.release_key(k.right_key)
+        if kpress == 2:
+            k.release_key("s")
+        ay_dev = abs(ay_avg - ay)
+        if (ay_dev > 0.5 and ay_dev < 1):
+            print("Walk...")
+            k.press_key(k.right_key)
+            kpress = 1
+        if (ay_dev >= 1):
+            print("Jump...")
+            k.press_key("s")
+            kpress = 2
 
         azl = int(hex(ord(data2[10])), 16)
         azh = int(hex(ord(data2[11])), 16)
@@ -76,8 +95,10 @@ class ReceiveNotification(object):
 
         self.connect()
         self.requester.write_by_handle(0x3C, str(bytearray([0x38, 0x03])))
+        time.sleep(1)
         self.requester.write_by_handle(0x3E, str(bytearray([0x0A])))
-        data = self.requester.read_by_handle(0x3C)[0]
+        time.sleep(1)
+        #data = self.requester.read_by_handle(0x3C)[0]
         self.requester.write_by_handle(0x3A, str(bytearray([0x1, 0x0])))
         self.wait_notification()
 
